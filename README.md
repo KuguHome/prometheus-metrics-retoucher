@@ -27,13 +27,11 @@ These can be implemented for later versions (nice to have)
 - add argument to output to file (`relabeler -out node-relabeled.prom`)
 - add argument to read in directory (`relabeler -dir scrapes/`)
 
-
-
 ### Development environment in Go
-As an editor you could use https://atom.io/
-Follow the instructions at https://golang.org/doc/install
-Video about it: https://www.youtube.com/watch?v=sNogq_98wV0
-Additional tools for Atom/Go: https://rominirani.com/setup-go-development-environment-with-atom-editor-a87a12366fcf
+* As an editor you could use https://atom.io/
+* Follow the install instructions for golang at https://golang.org/doc/install
+* Video about it: https://www.youtube.com/watch?v=sNogq_98wV0
+* Additional tools for Atom/Go: https://rominirani.com/setup-go-development-environment-with-atom-editor-a87a12366fcf
 
 ### Documentation
 * Short introduction to prometheus in general https://www.youtube.com/watch?v=WUkNnY65htQ
