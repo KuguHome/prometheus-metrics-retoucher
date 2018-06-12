@@ -9,6 +9,7 @@ Implement a program which ingests raw prometheus scrape data, adds some custom l
 - The program should accept data from STDIN, so it can be used on Linux via pipe (|) 
 - The program should output the data to STDOUT
 - An example input/output pair should look like this:
+
 Input:
 ```
 go_goroutines 9
