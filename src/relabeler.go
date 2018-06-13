@@ -2,9 +2,11 @@ package main
 
 import (
   "fmt"
+  "strings"
+  "log"
   //"io"
   "bufio"
-  //"os"
+  "os"
   "gopkg.in/alecthomas/kingpin.v2"
   )
 
@@ -20,15 +22,15 @@ func main() {
 
   //read file from stdin
   scanner := bufio.NewScanner(os.Stdin)
-  var line String
-  line := scanner.Scan()
+  var line bool
+  line = scanner.Scan()
 
   for line {
-    if scanner.Text()[0] == "#" {
+    if strings.Index("#", scanner.Text()) == 0 {
       fmt.Println("%s", scanner.Text())
-      line := scanner.Scan()
+      line = scanner.Scan()
     } else {
-      
+
     }
 
   }
