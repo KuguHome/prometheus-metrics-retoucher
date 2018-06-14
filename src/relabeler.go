@@ -9,8 +9,10 @@ import (
   "github.com/golang/protobuf/proto"
   )
 
+  //set up the --label flag
   var (
-    str = kingpin.Flag("label", "Add a custom label.").Strings()
+    flagArgs = kingpin.Flag("label", "Add a label and value in
+      the form <name>=<value>.").Strings()
   )
 
 func main() {
@@ -20,7 +22,7 @@ func main() {
   parsedFamilies, _ := parser.TextToMetricFamilies(os.Stdin)
 
   var validPairs []*dto.LabelPair
-  for _, elem := range *str {
+  for _, elem := range *flagArgs {
     eqInd := strings.Index(elem, "=")
       if eqInd != -1 {
         pair := &dto.LabelPair{
@@ -31,13 +33,10 @@ func main() {
       }
     }
 
-  for _, mf := range parsedFamilies {
-    for _, m := range mf.Metric {
-      m.Label = append(m.Label, validPairs...)
+  for _, metricFamily := range parsedFamilies {
+    for _, metric := range metricFamily.Metric {
+      metric.Label = append(metric.Label, validPairs...)
     }
-  }
-
-  for _, mf := range parsedFamilies {
-    expfmt.MetricFamilyToText(os.Stdout, mf)
+    expfmt.MetricFamilyToText(os.Stdout, metricFamily)
   }
 }
