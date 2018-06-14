@@ -1,13 +1,15 @@
 package main
 
 import (
-  "fmt"
-  "strings"
-  "log"
+  //"fmt"
+  //"strings"
+  //"log"
   //"io"
-  "bufio"
   "os"
   "gopkg.in/alecthomas/kingpin.v2"
+  dto "github.com/prometheus/client_model/go"
+  "github.com/prometheus/common/expfmt"
+  "github.com/golang/protobuf/proto"
   )
 
   var (
@@ -21,22 +23,22 @@ func main() {
   //all the desired custom labels (called by doing --label labelname)
 
   //read file from stdin
-  scanner := bufio.NewScanner(os.Stdin)
-  var line bool
-  line = scanner.Scan()
+  //scanner := bufio.NewScanner(os.Stdin)
+  //var line bool
+  //line = scanner.Scan()
 
-  for line {
-    if strings.Index("#", scanner.Text()) == 0 {
-      fmt.Println("%s", scanner.Text())
-      line = scanner.Scan()
-    } else {
+  var parser expfmt.TextParser
+  parsedFamilies, _ := parser.TextToMetricFamilies(os.Stdin)
 
-    }
-
+  for _, mf := range parsedFamilies {
+	     for _, m := range mf.Metric {
+        m.Label = append(m.Label, &dto.LabelPair{
+			     Name:  proto.String("favoriteFood"),
+			     Value: proto.String("sushi"),
+         })
+       }
   }
-
-  //error catch block?
-  if err := scanner.Err(); err != nil {
-	   log.Println(err)
+  for _, mf := range parsedFamilies {
+    expfmt.MetricFamilyToText(os.Stdout, mf)
   }
 }
