@@ -19,20 +19,23 @@ func main() {
   var parser expfmt.TextParser
   parsedFamilies, _ := parser.TextToMetricFamilies(os.Stdin)
 
+  var validPairs []*dto.LabelPair
   for _, elem := range *str {
     eqInd := strings.Index(elem, "=")
-    pair := &dto.LabelPair{
-        Name:  proto.String(elem[:eqInd]),
-        Value: proto.String(elem[eqInd+1:]),
-      }
       if eqInd != -1 {
-        for _, mf := range parsedFamilies {
-          for _, m := range mf.Metric {
-            m.Label = append(m.Label, pair)
+        pair := &dto.LabelPair{
+            Name:  proto.String(elem[:eqInd]),
+            Value: proto.String(elem[eqInd+1:]),
           }
-        }
+        validPairs = append(validPairs, pair)
       }
     }
+
+  for _, mf := range parsedFamilies {
+    for _, m := range mf.Metric {
+      m.Label = append(m.Label, validPairs...)
+    }
+  }
 
   for _, mf := range parsedFamilies {
     expfmt.MetricFamilyToText(os.Stdout, mf)
