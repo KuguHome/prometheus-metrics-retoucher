@@ -7,15 +7,15 @@ import (
   "gopkg.in/alecthomas/kingpin.v2"
 
   dto "github.com/prometheus/client_model/go"
-  
+
   "github.com/prometheus/common/expfmt"
   "github.com/golang/protobuf/proto"
   )
 
   //set up the --label flag
   var (
-    flagArgs = kingpin.Flag("label", "Add a label and value in
-      the form \"<label>=<value>\".").Strings()
+    flagArgs = kingpin.Flag("label", "Add a label and value in" +
+      "the form \"<label>=<value>\".").Strings()
   )
 
 func main() {
