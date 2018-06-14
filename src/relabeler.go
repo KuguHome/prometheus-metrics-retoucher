@@ -2,7 +2,7 @@ package main
 
 import (
   //"fmt"
-  //"strings"
+  "strings"
   //"log"
   //"io"
   "os"
@@ -13,7 +13,7 @@ import (
   )
 
   var (
-    label = kingpin.Flag("label", "Add a custom label.").Strings()
+    str = kingpin.Flag("label", "Add a custom label.").Strings()
   )
 
 func main() {
@@ -30,14 +30,19 @@ func main() {
   var parser expfmt.TextParser
   parsedFamilies, _ := parser.TextToMetricFamilies(os.Stdin)
 
-  for _, mf := range parsedFamilies {
-	     for _, m := range mf.Metric {
-        m.Label = append(m.Label, &dto.LabelPair{
-			     Name:  proto.String("favoriteFood"),
-			     Value: proto.String("sushi"),
-         })
-       }
-  }
+  for _, elem := range *str {
+    eqInd := strings.Index(elem, "=")
+      if eqInd != -1 {
+        for _, mf := range parsedFamilies {
+          for _, m := range mf.Metric {
+            m.Label = append(m.Label, &dto.LabelPair{
+                Name:  proto.String(elem[:eqInd]),
+                Value: proto.String(elem[eqInd+1:]),
+            })
+          }
+        }
+      }
+    }
   for _, mf := range parsedFamilies {
     expfmt.MetricFamilyToText(os.Stdout, mf)
   }
