@@ -13,8 +13,9 @@ import (
 
   //set up the --label flag
   var (
-    flagArgs = kingpin.Flag("label", "Add a label and value in" +
+    labelFlagArgs = kingpin.Flag("label", "Add a label and value in" +
       "the form \"<label>=<value>\".").StringMap()
+    dropFlagArgs = kingpin.Flag("drop", "Drop a metric").Strings()
   )
 
 func main() {
@@ -29,18 +30,26 @@ func main() {
   var validPairs []*dto.LabelPair
 
   //converts map into LabelPair slice
-  for key, value := range *flagArgs {
+  for key, value := range *labelFlagArgs {
         validPairs = append(validPairs, &dto.LabelPair{
 					Name:  proto.String(key),
 					Value: proto.String(value),
 				})
       }
 
-  //appends the valid pairs to the metrics and writes to StdOut
   for _, metricFamily := range parsedFamilies {
+    //delete metrics requested to be dropped
+    for _, name := range *dropFlagArgs {
+      delete(parsedFamilies, name)
+    }
+    //appends the valid pairs to the metrics
     for _, metric := range metricFamily.Metric {
       metric.Label = append(metric.Label, validPairs...)
     }
+  }
+
+  //write everything to STDOUT
+  for _, metricFamily := range parsedFamilies {
     expfmt.MetricFamilyToText(os.Stdout, metricFamily)
   }
 }
