@@ -13,8 +13,10 @@ import (
 
   //set up the --label flag
   var (
-    labelFlagArgs = kingpin.Flag("add-label", "Add a label and value in the form \"<label>=<value>\".").StringMap()
-    dropFlagArgs = kingpin.Flag("drop-metric", "Drop a metric").Strings()
+    labelFlagArgs = kingpin.Flag("add-label", "Add a label and value in the form \"<label>=<value>\".").PlaceHolder("value").Short('a').StringMap()
+    dropFlagArgs = kingpin.Flag("drop-metric", "Drop a metric").PlaceHolder("some_metric").Short('d').Strings()
+    inFileFlagArg = kingpin.Flag("in", "Accepts a file").File();
+    outFileFlagArg = kingpin.Flag("out", "Accepts a file").File();
   )
 
 func main() {
