@@ -37,19 +37,22 @@ func main() {
 				})
       }
 
+  //delete metrics requested to be dropped
+  for _, name := range *dropFlagArgs {
+    delete(parsedFamilies, name)
+  }
+
+  //appends the valid pairs to the metrics and write everything to STDOUT
   for _, metricFamily := range parsedFamilies {
-    //delete metrics requested to be dropped
-    for _, name := range *dropFlagArgs {
-      delete(parsedFamilies, name)
-    }
-    //appends the valid pairs to the metrics
     for _, metric := range metricFamily.Metric {
       metric.Label = append(metric.Label, validPairs...)
     }
-  }
-
-  //write everything to STDOUT
-  for _, metricFamily := range parsedFamilies {
     expfmt.MetricFamilyToText(os.Stdout, metricFamily)
   }
+
+  //this is here as a reminder that writing to STDOUT might need its own
+  //loop in case there's something else to do after appending valid pairs
+  //for _, metricFamily := range parsedFamilies {
+  //  expfmt.MetricFamilyToText(os.Stdout, metricFamily)
+  //}
 }
