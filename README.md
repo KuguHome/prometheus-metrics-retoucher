@@ -51,8 +51,8 @@ go_gc_duration_seconds{123="456",abc="def",Austin="Li",quantile="0"} 7.091e-06
 
 ## Prometheus relabeler
 
-### General objective
-Implement a program which ingests raw prometheus scrape data, adds some custom labels and outputs it again.
+### ~~General objective~~
+~~Implement a program which ingests raw prometheus scrape data, adds some custom labels and outputs it again.~~
 
 ### Detailed requirements (first step)
 - An example call to the program should look like this (name and syntax of the arguments is only an example, use what fits best to the client libraries):
