@@ -12,10 +12,20 @@ Command Line:
 --label <label>=<value> 
 	The label-value pair <label>=<value> is added to the incoming text in the correct 	format. --label can be called an arbitrary number of times.
 
+Making it Runnable From the Command Line:
+Compile the program with the following:
+go build relabeler.go
+
+This will make an executable, ‘relabeler’. After, the program has to be copied to the system path, which can be done by copying to /usr/local/bin:
+cp stringparse /usr/local/bin
+
+
 Example:
-This is a line in a .prom file before and after being run through the script:
+This is a line in a file called node.prom before and after being run through the script. The script can be called through the command line as follows:
+cat path/node.prom.txt | relabeler --label 123=456 --label abc=def --label Austin=Li --label one=more > node-relabeled.prom.txt
 
 Input:
 go_gc_duration_seconds{quantile="0"} 7.091e-06
 
 Output:
+go_gc_duration_seconds{abc="def",Austin="Li",one="more",123="456",quantile="0"} 7.091e-06
