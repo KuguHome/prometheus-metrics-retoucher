@@ -15,6 +15,8 @@ import (
   var (
     labelFlagArgs = kingpin.Flag("add-label", "Add a label and value in the form \"<label>=<value>\".").PlaceHolder("<label>=<value>").Short('a').StringMap()
     dropFlagArgs = kingpin.Flag("drop-metric", "Drop a metric").PlaceHolder("some_metric").Short('d').Strings()
+    //inFileFlagArg = kingpin.Flag("in", "Accepts a file").File();
+    //outFileFlagArg = kingpin.Flag("out", "Accepts a file").File();
   )
 
 func main() {
@@ -48,4 +50,10 @@ func main() {
     }
     expfmt.MetricFamilyToText(os.Stdout, metricFamily)
   }
+
+  //this is here as a reminder that writing to STDOUT might need its own
+  //loop in case there's something else to do after appending valid pairs
+  //for _, metricFamily := range parsedFamilies {
+  //  expfmt.MetricFamilyToText(os.Stdout, metricFamily)
+  //}
 }

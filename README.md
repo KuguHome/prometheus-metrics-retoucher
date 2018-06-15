@@ -73,7 +73,7 @@ go_goroutines{instance="some_instance",job="some_job"} 9
 
 ### Additional requirements
 These can be implemented for later versions (nice to have)
-- add argument to filter out/drop certain metrics (`relabeler -filter http_requests_total,http_request_duration_microseconds`)
+- ~~add argument to filter out/drop certain metrics (`relabeler -filter http_requests_total,http_request_duration_microseconds`)~~
 - add argument to read in file (`relabeler -in node.prom`)
 - add argument to output to file (`relabeler -out node-relabeled.prom`)
 - add argument to read in directory (`relabeler -dir scrapes/`)
