@@ -13,9 +13,9 @@ import (
 
   //set up the --label flag
   var (
-    labelFlagArgs = kingpin.Flag("label", "Add a label and value in" +
-      "the form \"<label>=<value>\".").StringMap()
-    dropFlagArgs = kingpin.Flag("drop", "Drop a metric").Strings()
+    labelFlagArgs = kingpin.Flag("remove-label", "Add a label and value in the form \"<label>=<value>\".").StringMap()
+    dropFlagArgs = kingpin.Flag("drop-metric", "Drop a metric").Strings()
+    
   )
 
 func main() {
