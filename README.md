@@ -35,7 +35,7 @@ go build relabeler.go
 
 This will make an executable, ‘relabeler’. After, the program has to be copied to the system path, which can be done by copying to /usr/local/bin:
 ```
-cp stringparse /usr/local/bin
+cp relabeler /usr/local/bin
 ```
 
 
