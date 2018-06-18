@@ -21,6 +21,12 @@ The label-value pair \<label\>=\<value\> is added to the incoming text in the co
 -d, --drop-metric some_metric
 The metric given by some_metric is dropped.
 
+    --in file_name
+Read in from file "file_name"
+
+    --out file_name 
+Write out to a file "file_name"
+
 ### Making it Runnable From the Command Line
 Compile the program with the following:
 ```
@@ -36,7 +42,7 @@ cp stringparse /usr/local/bin
 ### Example
 This is a line in a file called node.prom before and after being run through the script. The script can be called through the command line as follows:
 ```
-relabeler --in ~/Desktop/go/prometheus-relabeler/node.prom.txt --add-label 123=456 -a abc=def -a Austin=Li -d node_network_transmit_multicast > node-relabeled.prom.txt
+relabeler --in ~/Desktop/go/prometheus-relabeler/node.prom.txt --out node-relabeled.prom.txt --add-label 123=456 -a abc=def -a Austin=Li -d node_network_transmit_multicast
 ```
 
 Input:
@@ -74,8 +80,8 @@ go_goroutines{instance="some_instance",job="some_job"} 9
 ### Additional requirements
 These can be implemented for later versions (nice to have)
 - ~~add argument to filter out/drop certain metrics (`relabeler -filter http_requests_total,http_request_duration_microseconds`)~~
-- add argument to read in file (`relabeler -in node.prom`)
-- add argument to output to file (`relabeler -out node-relabeled.prom`)
+- ~~add argument to read in file (`relabeler -in node.prom`)~~
+- ~~add argument to output to file (`relabeler -out node-relabeled.prom`)~~
 - add argument to read in directory (`relabeler -dir scrapes/`)
 
 ### Development environment in Go

@@ -17,8 +17,8 @@ import (
   var (
     labelFlagArgs = kingpin.Flag("add-label", "Add a label and value in the form \"<label>=<value>\".").PlaceHolder("<label>=<value>").Short('a').StringMap()
     dropFlagArgs = kingpin.Flag("drop-metric", "Drop a metric").PlaceHolder("some_metric").Short('d').Strings()
-    inFileFlagArg = kingpin.Flag("in", "Accepts a file").File();
-    outFileFlagArg = kingpin.Flag("out", "Writes to a file").String(); //string because has to create the file
+    inFileFlagArg = kingpin.Flag("in", "Read in a file").PlaceHolder("file_name").File();
+    outFileFlagArg = kingpin.Flag("out", "Write to a File").PlaceHolder("file_name").String(); //string because has to create the file
   )
 
 func main() {
@@ -51,7 +51,7 @@ func main() {
     delete(parsedFamilies, name)
   }
 
-  //appends the valid pairs to the metrics and write everything to STDOUT
+  //appends the valid pairs to the metrics and write out
   if *outFileFlagArg == "" {
       writeOut(parsedFamilies, validPairs, os.Stdout)
   } else {
@@ -66,6 +66,7 @@ func main() {
   //}
 }
 
+//rebuild the text with the new labels and write to writeTo
 func writeOut(families map[string]*dto.MetricFamily, labelPairs []*dto.LabelPair, writeTo io.Writer) {
   for _, metricFamily := range families {
     for _, metric := range metricFamily.Metric {
