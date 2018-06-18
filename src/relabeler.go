@@ -51,22 +51,15 @@ func main() {
     delete(parsedFamilies, name)
   }
 
+  var outFile io.Writer
+
   //appends the valid pairs to the metrics and write everything to STDOUT
   if *outFileFlagArg == "" {
-    for _, metricFamily := range parsedFamilies {
-      for _, metric := range metricFamily.Metric {
-        metric.Label = append(metric.Label, validPairs...)
-      }
-      expfmt.MetricFamilyToText(os.Stdout, metricFamily)
-    }
+      outFile = os.Stdout
+      writeOut(parsedFamilies, validPairs, outFile)
   } else {
-      file, _ := os.Create(*outFileFlagArg)
-      for _, metricFamily := range parsedFamilies {
-        for _, metric := range metricFamily.Metric {
-          metric.Label = append(metric.Label, validPairs...)
-        }
-        expfmt.MetricFamilyToText(file, metricFamily)
-      }
+      outFile, _ = os.Create(*outFileFlagArg)
+      writeOut(parsedFamilies, validPairs, outFile)
   }
 
   //this is here as a reminder that writing to STDOUT might need its own
@@ -74,4 +67,13 @@ func main() {
   //for _, metricFamily := range parsedFamilies {
   //  expfmt.MetricFamilyToText(os.Stdout, metricFamily)
   //}
+}
+
+func writeOut(families map[string]*dto.MetricFamily, labelPairs []*dto.LabelPair, writeTo io.Writer) {
+  for _, metricFamily := range families {
+    for _, metric := range metricFamily.Metric {
+      metric.Label = append(metric.Label, labelPairs...)
+    }
+    expfmt.MetricFamilyToText(writeTo, metricFamily)
+  }
 }

@@ -36,7 +36,7 @@ cp stringparse /usr/local/bin
 ### Example
 This is a line in a file called node.prom before and after being run through the script. The script can be called through the command line as follows:
 ```
-cat path/node.prom.txt | relabeler --label 123=456 -a abc=def --label Austin=Li > node-relabeled.prom.txt
+relabeler --in ~/Desktop/go/prometheus-relabeler/node.prom.txt --add-label 123=456 -a abc=def -a Austin=Li -d node_network_transmit_multicast > node-relabeled.prom.txt
 ```
 
 Input:
