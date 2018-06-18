@@ -58,12 +58,6 @@ func main() {
       outFile, _ := os.Create(*outFileFlagArg)
       writeOut(parsedFamilies, validPairs, outFile)
   }
-
-  //this is here as a reminder that writing to STDOUT might need its own
-  //loop in case there's something else to do after appending valid pairs
-  //for _, metricFamily := range parsedFamilies {
-  //  expfmt.MetricFamilyToText(os.Stdout, metricFamily)
-  //}
 }
 
 //rebuild the text with the new labels and write to writeTo
