@@ -21,10 +21,10 @@ The label-value pair \<label\>=\<value\> is added to the incoming text in the co
 -d, --drop-metric some_metric
 The metric given by some_metric is dropped.
 
-&nbsp;&nbsp;&nbsp;&nbsp; --in file_name
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; --in file_name
 Read in from file "file_name"
 
-&nbsp;&nbsp;&nbsp;&nbsp; --out file_name 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; --out file_name 
 Write out to a file "file_name"
 
 ### Making it Runnable From the Command Line
