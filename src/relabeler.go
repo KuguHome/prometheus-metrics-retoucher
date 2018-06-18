@@ -51,14 +51,11 @@ func main() {
     delete(parsedFamilies, name)
   }
 
-  var outFile io.Writer
-
   //appends the valid pairs to the metrics and write everything to STDOUT
   if *outFileFlagArg == "" {
-      outFile = os.Stdout
-      writeOut(parsedFamilies, validPairs, outFile)
+      writeOut(parsedFamilies, validPairs, os.Stdout)
   } else {
-      outFile, _ = os.Create(*outFileFlagArg)
+      outFile, _ := os.Create(*outFileFlagArg)
       writeOut(parsedFamilies, validPairs, outFile)
   }
 
