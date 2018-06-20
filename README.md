@@ -21,7 +21,7 @@ Write out to a file "file_name"
 ### Example
 This is a line in a file called node.prom before and after being run through the script. The script can be called through the command line as follows:
 ```
-cat node.prom.txt | relabeler --add-label instance=some_instance -a job=some_job  > node-relabeled.prom.txt`
+cat node.prom.txt | relabeler --add-label instance=some_instance -a job=some_job  > node-relabeled.prom.txt
 ```
 or
 ```
