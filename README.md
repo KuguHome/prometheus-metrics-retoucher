@@ -1,31 +1,99 @@
-### Setup
-This script uses the language Golang. Go to the following website for installation instructions:
+## Prometheus relabeler/retoucher
+
+### Details
+This program is made for the purpose of retouching metrics from exporters before ingesting them into [Prometheus](https://prometheus.io).
+
+The program reads from STDIN or a file. It then parses the text into metrics, adds labels or drops metrics as requested through the command line, puts back together formatted text with the new labels, and writes it to STDOUT or a file.
+
+### Command Line
+`-a, --add-label <label>=<value>`
+The label-value pair \<label\>=\<value\> is added to the incoming text in the correct format. Can be called an arbitrary number of times.
+
+`-d, --drop-metric some_metric`
+The metric given by some_metric is dropped. Can be called an arbitrary number of times.
+
+`--in file_name`
+Read in from file "file_name"
+
+`--out file_name`
+Write out to a file "file_name"
+
+### Example
+This is a line in a file called node.prom before and after being run through the script. The script can be called through the command line as follows:
+```
+cat node.prom.txt | relabeler --add-label instance=some_instance -a job=some_job  > node-relabeled.prom.txt
+```
+or
+```
+relabeler --in node.prom.txt --out node-relabeled.prom.txt --add-label instance=some_instance -a job=some_job -d node_network_transmit_multicast
+```
+
+Input (node.prom.txt):
+```
+go_gc_duration_seconds{quantile="0"} 7.091e-06
+```
+
+Output (node-relabeled.prom.txt):
+```
+go_gc_duration_seconds{instance="some_instance",job="some_job",quantile="0"} 7.091e-06
+```
+
+### Applications
+The tool can be used to retouch scrapes from different distributed node_exporter instances, before pushing them to the [Pushgateway](https://github.com/prometheus/pushgateway). Normally, there would be a collision between the scrape's metrics and pushgateway's internal metrics, so before pushing, you can drop the colliding metrics via this tool:
+```
+cat node.prom.txt | ./relabeler \
+--drop-metric go_memstats_last_gc_time_seconds \
+--drop-metric go_goroutines --drop-metric go_memstats_other_sys_bytes \
+--drop-metric go_gc_duration_seconds \
+--drop-metric process_virtual_memory_bytes \
+--drop-metric go_memstats_heap_inuse_bytes \
+--drop-metric process_open_fds \
+--drop-metric go_memstats_heap_alloc_bytes \
+--drop-metric go_threads \
+--drop-metric go_memstats_mcache_inuse_bytes \
+--drop-metric process_max_fds \
+--drop-metric go_memstats_alloc_bytes \
+--drop-metric http_response_size_bytes \
+--drop-metric process_start_time_seconds \
+--drop-metric go_memstats_heap_released_bytes \
+--drop-metric go_memstats_sys_bytes \
+--drop-metric go_memstats_heap_idle_bytes  \
+--drop-metric process_resident_memory_bytes  \
+--drop-metric go_memstats_mcache_sys_bytes  \
+--drop-metric go_memstats_frees_total  \
+--drop-metric go_memstats_heap_objects \
+--drop-metric go_memstats_next_gc_bytes  \
+--drop-metric go_memstats_buck_hash_sys_bytes \
+--drop-metric go_memstats_stack_sys_bytes \
+--drop-metric go_memstats_heap_sys_bytes \
+--drop-metric go_memstats_mspan_inuse_bytes \
+--drop-metric go_memstats_gc_cpu_fraction \
+--drop-metric go_memstats_stack_inuse_bytes \
+--drop-metric http_request_duration_microseconds \
+--drop-metric go_memstats_mspan_sys_bytes \
+--drop-metric go_info \
+--drop-metric go_memstats_gc_sys_bytes \
+--drop-metric http_requests_total \
+--drop-metric go_memstats_lookups_total \
+--drop-metric process_cpu_seconds_total \
+--drop-metric go_memstats_mallocs_total \
+--drop-metric go_memstats_alloc_bytes_total \
+--drop-metric http_request_size_bytes \
+| curl --data-binary @- http://localhost:9091/metrics/job/node/instance/remote-machine
+```
+
+Or alternatively instead of using the Pushgateway to merge different distributed exporter scrapes, you could use [node_exporter's textfile collector](https://github.com/prometheus/node_exporter/blob/master/README.md#textfile-collector). Use the `--add-label` argument of this tool to add a different label to the metrics in each file to be able to discern them later in prometheus. But this will NOT work with scrapes of other node_exporters, since the metrics from the .prom files will collide with node_exporter's own metrics. A way to go may be to deactivate ALL collectors EXCEPT the textfile collector.
+
+### Development/Build Setup
+This program uses the language Golang. Go to the following website for installation instructions:
 ```
 https://golang.org/doc/install
 ```
-
-
 
 You will also need to perform:
 ```
 go get github.com/prometheus/client_model/go
 ```
-
-### Script Details
-The program reads from STDIN. It then parses the text into metrics, adds labels or drops metrics as requested through the command line, puts back together formatted text with the new labels, and writes it to STDOUT.
-
-### Command Line
--a, --add-label \<label\>=\<value\> 
-The label-value pair \<label\>=\<value\> is added to the incoming text in the correct 	format. --label can be called an arbitrary number of times.
-
--d, --drop-metric some_metric
-The metric given by some_metric is dropped.
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; --in file_name
-Read in from file "file_name"
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; --out file_name 
-Write out to a file "file_name"
 
 ### Making it Runnable From the Command Line
 Compile the program with the following:
@@ -33,66 +101,8 @@ Compile the program with the following:
 go build relabeler.go
 ```
 
-This will make an executable, ‘relabeler’. After, the program has to be copied to the system path, which can be done by copying to /usr/local/bin:
+This will make an executable, ‘relabeler’. After, the program can be copied to the system path, which can be done by copying to /usr/local/bin:
 ```
 cp relabeler /usr/local/bin
 ```
 
-
-### Example
-This is a line in a file called node.prom before and after being run through the script. The script can be called through the command line as follows:
-```
-relabeler --in ~/Desktop/go/prometheus-relabeler/node.prom.txt --out node-relabeled.prom.txt --add-label 123=456 -a abc=def -a Austin=Li -d node_network_transmit_multicast
-```
-
-Input:
-```
-go_gc_duration_seconds{quantile="0"} 7.091e-06
-```
-
-Output:
-```
-go_gc_duration_seconds{123="456",abc="def",Austin="Li",quantile="0"} 7.091e-06
-```
-
-## Prometheus relabeler
-
-### ~~General objective~~
-~~Implement a program which ingests raw prometheus scrape data, adds some custom labels and outputs it again.~~
-
-### Detailed requirements (first step)
-- An example call to the program should look like this (name and syntax of the arguments is only an example, use what fits best to the client libraries):
-`cat node.prom | relabeler -label instance=some_instance -label job=some_job  > node-relabeled.prom`
-- The program should accept data from STDIN, so it can be used on Linux via pipe (|) 
-- The program should output the data to STDOUT
-- An example input/output pair should look like this:
-
-Input:
-```
-go_goroutines 9
-```
-
-Output:
-```
-go_goroutines{instance="some_instance",job="some_job"} 9
-```
-
-### Additional requirements
-These can be implemented for later versions (nice to have)
-- ~~add argument to filter out/drop certain metrics (`relabeler -filter http_requests_total,http_request_duration_microseconds`)~~
-- ~~add argument to read in file (`relabeler -in node.prom`)~~
-- ~~add argument to output to file (`relabeler -out node-relabeled.prom`)~~
-- add argument to read in directory (`relabeler -dir scrapes/`)
-
-### Development environment in Go
-* As an editor you could use https://atom.io/
-* Follow the install instructions for golang at https://golang.org/doc/install
-* Video about it: https://www.youtube.com/watch?v=sNogq_98wV0
-* Additional tools for Atom/Go: https://rominirani.com/setup-go-development-environment-with-atom-editor-a87a12366fcf
-
-### Documentation
-* Short introduction to prometheus in general https://www.youtube.com/watch?v=WUkNnY65htQ
-* Longer talk about some Prometheus details (in conjunction with Docker) https://www.youtube.com/watch?v=PDxcEzu62jk
-* Library for implementation in Go https://github.com/prometheus/client_golang
-* Library for implementation in Python, including some examples  https://github.com/prometheus/client_python
-* Prometheus documentation with information about concepts etc. https://prometheus.io/docs/concepts/data_model/
