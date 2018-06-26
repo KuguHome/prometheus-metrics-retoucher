@@ -4,6 +4,9 @@ import (
   "os"
   "io"
   "bufio"
+  "io/ioutil"
+  "log"
+  "strings"
 
   "gopkg.in/alecthomas/kingpin.v2"
 
@@ -20,36 +23,8 @@ import (
     inFileFlagArg = kingpin.Flag("in", "Read in a file").PlaceHolder("file_name").File();
     outFileFlagArg = kingpin.Flag("out", "Write to a File").PlaceHolder("file_name").String(); //string because has to create the file
     defaultDropFlag = kingpin.Flag("drop-default-metrics", "Drop default metrics").Bool();
-  )
-
-func main() {
-  //parses command line flags into a key=value map
-  kingpin.Parse()
-
-  //creates TextParser and parses text into metrics
-  var parser expfmt.TextParser
-  var reader io.Reader
-  if *inFileFlagArg == nil {
-    reader = os.Stdin
-  } else {
-    reader = bufio.NewReader(*inFileFlagArg)
-  }
-  parsedFamilies, _ := parser.TextToMetricFamilies(reader)
-
-  //validPairs is a slice of POINTERS
-  var validPairs []*dto.LabelPair
-
-  //converts map into LabelPair slice
-  for key, value := range *labelFlagArgs {
-        validPairs = append(validPairs, &dto.LabelPair{
-					Name:  proto.String(key),
-					Value: proto.String(value),
-				})
-      }
-
-  //add the default drop metrics to the list of metrics to be dropped
-  if *defaultDropFlag {
-    *dropFlagArgs = append(*dropFlagArgs, []string{
+    inDirFlagArg = kingpin.Flag("in-dir", "Read in a directory").PlaceHolder("dir_name").String();
+    defaultFlags = []string{
       "go_memstats_last_gc_time_seconds",
       "go_goroutines",
       "go_memstats_other_sys_bytes",
@@ -87,20 +62,47 @@ func main() {
       "process_cpu_seconds_total",
       "go_memstats_mallocs_total",
       "go_memstats_alloc_bytes_total",
-      "http_request_size_bytes"}...)
-  }
+      "http_request_size_bytes"}
+  )
 
-  //delete metrics requested to be dropped
-  for _, name := range *dropFlagArgs {
-    delete(parsedFamilies, name)
-  }
+func main() {
+  //parses command line flags into a key=value map
+  kingpin.Parse()
 
-  //appends the valid pairs to the metrics and write out
-  if *outFileFlagArg == "" {
-      writeOut(parsedFamilies, validPairs, os.Stdout)
+  var writer io.Writer
+  if *outFileFlagArg != "" {
+    var err error
+    writer, err = os.Create(*outFileFlagArg)
+    if err != nil {
+        log.Fatal(err)
+    }
   } else {
-      outFile, _ := os.Create(*outFileFlagArg)
-      writeOut(parsedFamilies, validPairs, outFile)
+    writer = os.Stdout
+  }
+
+  if (*inFileFlagArg == nil) && (*inDirFlagArg == "") {
+    parseAndRebuild(os.Stdin, os.Stdout)
+  } else {
+    if *inFileFlagArg != nil {
+      reader := bufio.NewReader(*inFileFlagArg)
+      parseAndRebuild(reader, writer)
+    }
+    if *inDirFlagArg != "" {
+      filesInfo, err := ioutil.ReadDir(*inDirFlagArg)
+      if err != nil {
+          log.Fatal(err)
+      }
+      for _, info := range filesInfo {
+        //not sure if this if statement is necessary
+        if strings.HasSuffix(info.Name(), ".prom") {
+          reader, err := os.Open("" + *inDirFlagArg + "/" + info.Name())
+          if err != nil {
+              log.Fatal(err)
+          }
+          parseAndRebuild(reader, writer)
+        }
+      }
+    }
   }
 }
 
@@ -112,4 +114,39 @@ func writeOut(families map[string]*dto.MetricFamily, labelPairs []*dto.LabelPair
     }
     expfmt.MetricFamilyToText(writeTo, metricFamily)
   }
+}
+
+//converts key-value map into LabelPair slice
+func pairToSlice(pairs []*dto.LabelPair) []*dto.LabelPair {
+  for key, value := range *labelFlagArgs {
+        pairs = append(pairs, &dto.LabelPair{
+					Name:  proto.String(key),
+					Value: proto.String(value),
+				})
+      }
+      return pairs;
+}
+
+func parseAndRebuild(readFrom io.Reader, writeTo io.Writer) {
+    //creates TextParser and parses text into metrics
+  var parser expfmt.TextParser
+
+  parsedFamilies, _ := parser.TextToMetricFamilies(readFrom)
+
+  //validPairs is a slice of POINTERS
+  var validPairs []*dto.LabelPair
+
+  //converts map into LabelPair slice
+  validPairs = pairToSlice(validPairs)
+
+  //add the default drop metrics to the list of metrics to be dropped
+  if *defaultDropFlag {
+    *dropFlagArgs = append(*dropFlagArgs, defaultFlags...)
+  }
+
+  //delete metrics requested to be dropped
+  for _, name := range *dropFlagArgs {
+    delete(parsedFamilies, name)
+  }
+  writeOut(parsedFamilies, validPairs, writeTo)
 }
