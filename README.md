@@ -12,11 +12,14 @@ The label-value pair \<label\>=\<value\> is added to the incoming text in the co
 `-d, --drop-metric some_metric`
 The metric given by some_metric is dropped. Can be called an arbitrary number of times.
 
-`--in file_name`
-Read in from file "file_name"
+`--in <file_name>`
+Read in a .prom file \<file_name\>
 
-`--out file_name`
-Write out to a file "file_name"
+`--out <file_name>`
+Write out to a file \<file_name\>
+
+`in-dir <dir_name>`
+Read in a directory \<dir_name\> and run the program on each .prom file in the directory. Does not go into sub-directories.
 
 ### Example
 This is a line in a file called node.prom before and after being run through the script. The script can be called through the command line as follows:
@@ -105,4 +108,3 @@ This will make an executable, ‘relabeler’. After, the program can be copied 
 ```
 cp relabeler /usr/local/bin
 ```
-

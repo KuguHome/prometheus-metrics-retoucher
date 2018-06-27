@@ -83,7 +83,7 @@ func main() {
   if (*inFileFlagArg == nil) && (*inDirFlagArg == "") {
     parseAndRebuild(os.Stdin, os.Stdout)
   } else {
-    if *inFileFlagArg != nil {
+    if *inFileFlagArg != nil && strings.HasSuffix((*inFileFlagArg).Name(), ".prom"){
       reader := bufio.NewReader(*inFileFlagArg)
       parseAndRebuild(reader, writer)
     }
@@ -148,5 +148,6 @@ func parseAndRebuild(readFrom io.Reader, writeTo io.Writer) {
   for _, name := range *dropFlagArgs {
     delete(parsedFamilies, name)
   }
+
   writeOut(parsedFamilies, validPairs, writeTo)
 }
