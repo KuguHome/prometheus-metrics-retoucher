@@ -69,6 +69,7 @@ func main() {
   //parses command line flags into a key=value map
   kingpin.Parse()
 
+  //set the writer
   var writer io.Writer
   if *outFileFlagArg != "" {
     var err error
@@ -80,20 +81,21 @@ func main() {
     writer = os.Stdout
   }
 
+  //goes through all cases of possible readers
   if (*inFileFlagArg == nil) && (*inDirFlagArg == "") {
     parseAndRebuild(os.Stdin, os.Stdout)
   } else {
-    if *inFileFlagArg != nil && strings.HasSuffix((*inFileFlagArg).Name(), ".prom"){
+    if *inFileFlagArg != nil && strings.HasSuffix((*inFileFlagArg).Name(), ".prom") {
       reader := bufio.NewReader(*inFileFlagArg)
       parseAndRebuild(reader, writer)
     }
+    //directory with .prom files
     if *inDirFlagArg != "" {
       filesInfo, err := ioutil.ReadDir(*inDirFlagArg)
       if err != nil {
           log.Fatal(err)
       }
       for _, info := range filesInfo {
-        //not sure if this if statement is necessary
         if strings.HasSuffix(info.Name(), ".prom") {
           reader, err := os.Open("" + *inDirFlagArg + "/" + info.Name())
           if err != nil {
@@ -127,6 +129,7 @@ func pairToSlice(pairs []*dto.LabelPair) []*dto.LabelPair {
       return pairs;
 }
 
+//parses a stream coming in from readFrom, adds and drops metrics, rebuilds it, and writes it to writeTo
 func parseAndRebuild(readFrom io.Reader, writeTo io.Writer) {
     //creates TextParser and parses text into metrics
   var parser expfmt.TextParser
